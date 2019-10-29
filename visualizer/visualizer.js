@@ -49,20 +49,9 @@ function animationLooper() {
 
     // draw bars
     analyser.getByteFrequencyData(frequency_array);
-    for(var i = 0; i < bars; i++){
-        // divide circle into equal parts
-        rads = Math.PI * 2 /bars;
 
-        bar_height = frequency_array[i]*0.7;;
-
-        x = center_x + Math.cos(rads * i) * (radius);
-        y = center_y + Math.sin(rads * i) * (radius);
-        x_end = center_x + Math.cos(rads * i) * (radius + bar_height);
-        y_end = center_y + Math.sin(rads * i) * (radius + bar_height);
-
-        // draw this bar
-        drawBar(ctx,x,y,x_end,y_end,bar_width,frequency_array[i]);
-    }
+    //bar(); // ORIGINAL
+    radial();
     window.requestAnimationFrame(animationLooper);
 }
 
@@ -76,4 +65,98 @@ function drawBar(ctx,x,y,x_end,y_end,bar_width,frequency) {
     ctx.moveTo(x,y);
     ctx.lineTo(x_end,y_end);
     ctx.stroke();
+}
+
+function bar() {
+    for(let i = 0; i < bars; i++) {
+        rads = (2 * Math.PI) / bars;
+        bar_height = frequency_array[i] * 0.7;
+        //console.log("FREQ: " + frequency_array[i]);
+
+        x = center_x + Math.cos(rads * i) * radius;
+        y = center_y + Math.sin(rads * i) * radius;
+        x_end = center_x + Math.cos(rads * i) * (radius + bar_height);
+        y_end = center_y + Math.sin(rads * i) * (radius + bar_height);
+
+        drawBar(ctx,x,y,x_end,y_end,bar_width,frequency_array[i]);
+    }
+}
+
+function lowRadial() {
+    let band = Math.floor(frequency_array.length / 3);
+    let sum = 0;
+
+    for(let freq = 0; freq < Math.floor(band); freq++) {
+        sum = sum + frequency_array[freq];
+    }
+
+    var loAgg = sum / band;
+    //console.log("lo band: " + band);
+    //console.log("loAgg: " + loAgg);
+    //console.log("sum: " + sum);
+    return loAgg;
+}
+
+function midRadial() {
+    let band = Math.floor(frequency_array.length / 3);
+    let sum = 0;
+
+    for(let freq = band; freq < (2 * band); freq++) {
+        sum = sum + frequency_array[freq]
+    }
+
+    var midAgg = sum / band;
+    console.log("mid band: " + (2 * band));
+    console.log("midAgg: " + midAgg);
+    return midAgg;
+}
+
+function highRadial() {
+    let band = Math.floor(frequency_array.length / 3);
+    let sum = 0;
+
+    for(let freq = Math.floor(2 * band); freq < (3 * band); freq++) {
+        sum = sum + frequency_array[freq];
+    }
+
+    var hiAgg = sum / band;
+    console.log("hi band: " + (3 * band));
+    console.log("hiAgg: " + hiAgg);
+    return hiAgg;
+}
+
+function drawRadialBand(centerX, centerY, totalRadius, color = "rgb(0,0,0)", width = 1) {
+    console.log("band radius: " + totalRadius);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width
+
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, totalRadius, 0, 2 * Math.PI);
+    ctx.stroke();
+}
+
+function drawRadial(hiAgg, midAgg, loAgg) {
+    // DRAW A CIRCLE FOR EACH Agg VALUE
+    // DRAW FROM hi TO lo
+    // NO FILL FOR NOW; SET THICKNESS OF ARC INSTEAD
+    // ADD PARAMETER PANEL
+    //
+    // TODO: UPDATE COLORS WITH FREQUENCY BASED; COMPOSE FORMULA
+    
+    let loRadius = radius + loAgg;
+    let midRadius = loRadius + midAgg;
+    let hiRadius = midRadius + hiAgg;
+    //console.log("lmh: " + loRadius + "," + midRadius + "," + hiRadius);
+
+    drawRadialBand(center_x, center_y, hiRadius);
+    drawRadialBand(center_x, center_y, midRadius);
+    drawRadialBand(center_x, center_y, loRadius);
+}
+
+function radial() {
+    loAgg = lowRadial();
+    midAgg = midRadial();
+    hiAgg = highRadial();
+
+    drawRadial(loAgg, midAgg, hiAgg);
 }
