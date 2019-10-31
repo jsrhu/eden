@@ -126,7 +126,6 @@ function highRadial() {
 }
 
 function drawRadialBand(centerX, centerY, totalRadius, color = "rgb(0,0,0)", width = 1) {
-    console.log("band radius: " + totalRadius);
     ctx.strokeStyle = color;
     ctx.lineWidth = width
 
